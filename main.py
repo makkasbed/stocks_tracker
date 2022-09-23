@@ -57,7 +57,7 @@ def send_sms(message, phone, change):
     auth_token = os.getenv('ATKN')
     client = Client(account_sid, auth_token)
     message = client.messages.create(
-        body=f"{STOCK_NAME} {change}%\n{message}",
+        body=f"{STOCK_NAME} {change} {percent}%\n{message}",
         from_=os.getenv("ANUM"),
         to=phone
     )
@@ -82,6 +82,7 @@ print(f"The difference between {y_price} and {p_price} is {display_diff}")
 
 
 percent = (diff / y_price) * 100
+percent = round(percent)
 print(f"The corresponding percentage is {percent}")
 
 
