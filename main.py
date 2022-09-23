@@ -39,7 +39,7 @@ def get_previous_day_price():
     return float(pday_price)
 
 
-def get_news(day):
+def get_news(day, change):
     url = "https://newsapi.org/v2/everything?q="+COMPANY_NAME+"&from="+str(day)+"&sortBy=publishedAt&apiKey="+os.getenv("API_KEY")
 
     payload = {}
@@ -52,12 +52,12 @@ def get_news(day):
     return summary_news
 
 
-def send_sms(message, phone):
+def send_sms(message, phone, change):
     account_sid = os.getenv('ASID')
     auth_token = os.getenv('ATKN')
     client = Client(account_sid, auth_token)
     message = client.messages.create(
-        body=message,
+        body=f"{STOCK_NAME} {change}%\n{message}",
         from_=os.getenv("ANUM"),
         to=phone
     )
@@ -67,7 +67,16 @@ def send_sms(message, phone):
 y_price = get_yesterday_price()
 p_price = get_previous_day_price()
 
-diff = abs(y_price - p_price)
+change = None
+
+diff = y_price - p_price
+
+if diff > 0:
+    change = "🔺"
+else:
+    change = " 🔻"
+
+diff = abs(diff)
 display_diff = str(diff).format(".:2f")
 print(f"The difference between {y_price} and {p_price} is {display_diff}")
 
@@ -78,9 +87,9 @@ print(f"The corresponding percentage is {percent}")
 
 day = datetime.date.today() - datetime.timedelta(days=1)
 if percent > 1:
-    summary = get_news(day)
+    summary = get_news(day, change)
     for item in summary:
-        send_sms(item, '+233242182591')
+        send_sms(item, '+233242182591', change)
 
 
 
